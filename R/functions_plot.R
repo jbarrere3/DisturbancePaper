@@ -243,7 +243,7 @@ plot_trait_effect_ms <- function(traits, traits_TRY, sensitivity, file.in){
       "Leaf C/N" = "TRY_leaf.CN.ratio_g.cm3", 
       "Leaf Nmass" = "TRY_leaf.N.mass_mg.g", 
       "Leaf thick." = "TRY_leaf.thickness_mm", 
-      "Stomata cond." = "TRY_stomata.conductance_millimolm-2s-1"
+      "p50"
     )
   
   # Center and scale the trait values
@@ -299,7 +299,7 @@ plot_trait_effect_ms <- function(traits, traits_TRY, sensitivity, file.in){
   data <- data %>%
     mutate(trait.category = case_when(
       trait %in% c("Wood dens.", "Lifespan", "Max. growth") ~ "Growth vs.\n  survival", 
-      trait %in% c("Leaf thick.", "Stomata cond.") ~ "Drought \n traits", 
+      trait %in% c("Leaf thick.", "Stomata cond.", "p50") ~ "Drought \n traits", 
       trait %in% c("Leaf C/N", "Leaf Nmass") ~ "Growth vs.\n defense", 
       trait %in% c("Shade tol.") ~ "Shade \ntolerance", 
       TRUE ~ "Architectural\ntraits"

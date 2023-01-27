@@ -42,6 +42,7 @@ list(
   tar_target(wood.density_file, "data/traits/GlobalWoodDensityDatabase.xls", format = "file"),
   tar_target(shade.tolerance_file, "data/traits/shade_tolerance_FrenchNFI.csv", format = "file"),
   tar_target(root.depth_file, "data/traits/GRooTAggregateSpeciesVersion.csv", format = "file"),
+  tar_target(P50_file, "data/traits/DataBase.xlsx", format = "file"),
   tar_target(NFI.traits_file, "data/traits/traitsNFI.csv", format = "file"),
   tar_target(TRY_file, "data/traits/TRY_data_request_21092.txt", format = "file"),
   tar_target(gbif_file, "data/climate/sp_gbif_climate.csv", format = "file"),
@@ -50,7 +51,8 @@ list(
   
   ## - Compile traits data
   tar_target(traits_TRY, compile_traits_TRY(TRY_file, NFI.traits_file)),
-  tar_target(traits, compile_traits(wood.density_file, shade.tolerance_file, root.depth_file, NFI.traits_file)), 
+  tar_target(traits, compile_traits(wood.density_file, shade.tolerance_file, 
+                                    root.depth_file, P50_file, NFI.traits_file)), 
   
   ## - Get parameters from raw model outputs
   tar_target(param_per_iteration, get_param_from_rdata(sensitivity_file)),

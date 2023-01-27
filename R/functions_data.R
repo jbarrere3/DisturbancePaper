@@ -33,7 +33,8 @@ scale_data <- function(data_model,  var){
 #' @param FUNDIV_tree original tree dataset (to get height diameter ratio)
 #' @param FUNDIV_plot Plot-level data formatted for FUNDIV
 #' @param species.in character vector of all the species for which to extract the data
-compile_traits <- function(wood.density_file, shade.tolerance_file, root.depth_file, NFI.traits_file){
+compile_traits <- function(wood.density_file, shade.tolerance_file, 
+                           root.depth_file, P50_file, NFI.traits_file){
   
   # Traits from NFI data
   traits.NFI <- fread(NFI.traits_file)
@@ -58,6 +59,15 @@ compile_traits <- function(wood.density_file, shade.tolerance_file, root.depth_f
     dplyr::select("species", "traitName", "meanSpecies") %>%
     spread(key = "traitName", value = "meanSpecies")
   
+  # Read P50 per species
+  data_p50 = as.data.frame(read_xlsx(P50_file, sheet = "ALL")) %>%
+    dplyr::select(species = Species.binomial, p50 = Pclose) %>%
+    # Add data from Loppez et al. 2011  (https://doi.org/10.1093/aob/mct084)
+    rbind(data.frame(species = c("Pinus canariensis"), 
+                     p50 = mean(c(-3.77, -4.61, -3.16, -4.61, -4.47, -3.13, 
+                                  -3.8, -4.32, -5.73, -6.05, -5.44, -4.76, 
+                                  -5.29, -4.62, -5.74, -5.65))))
+  
   # Global trait dataset
   traits <- traits.NFI %>%
     # Add wood density
@@ -68,7 +78,9 @@ compile_traits <- function(wood.density_file, shade.tolerance_file, root.depth_f
     # Add shade tolerance
     left_join(shade.tolerance, by = "species") %>%
     # Add root depth
-    left_join(root.depth, by = "species") 
+    left_join(root.depth, by = "species")  %>%
+    # Add p50
+    left_join(data_p50, by = "species") 
   
   return(traits)
 }
@@ -226,3 +238,88 @@ get_sensitivity_from_param <- function(param_per_iteration, dbh.ref = 250, I.ref
   
 }
 
+
+
+
+
+
+
+
+
+
+
+#' Function to add P50 to the trait dataset
+#' @param traits data with traits data
+#' @param P50_file name of the file containing p50 data (from Choat paper)
+add_p50_to_traits = function(traits, P50_file){
+  
+  # Read P50 per species
+  data_p50 = data.frame(species = as.character(unlist(read_xls(P50_file)[-1, 2])), 
+                        p50 = as.numeric(unlist(read_xls(P50_file)[-1, 3]))) 
+  
+  # Add it to the trait dataset
+  out = traits %>%
+    left_join(data_p50, by = "species")
+  
+  # Return output
+  return(out)
+}
+
+#' Function to add P50 to the trait dataset
+#' @param traits data with traits data
+#' @param P50_file2 name of the file containing p50 data (from Sureau paper)
+add_p50_to_traits2 = function(traits, P50_file2){
+  
+  # Read P50 per species
+  data_p50 = as.data.frame(read_xlsx(P50_file2, sheet = "ALL")) %>%
+    dplyr::select(species = Species.binomial, p50 = Pclose) %>%
+    # Add data from Loppez et al. 2011  (https://doi.org/10.1093/aob/mct084)
+    rbind(data.frame(species = c("Pinus canariensis"), 
+                     p50 = mean(c(-3.77, -4.61, -3.16, -4.61, -4.47, -3.13, 
+                                  -3.8, -4.32, -5.73, -6.05, -5.44, -4.76, 
+                                  -5.29, -4.62, -5.74, -5.65))))
+  
+  # Add it to the trait dataset
+  out = traits %>%
+    left_join(data_p50, by = "species")
+  
+  # Return output
+  return(out)
+}
+
+#' Function to add P50 from Choat + manual entry of other sources to traits
+#' @param traits data with traits data
+#' @param P50_file name of the file containing p50 data (from Choat paper)
+#' Sources: Quercus suber (https://doi.org/10.5281/zenodo.854699) 
+#'          Pinus canariensis (https://doi.org/10.1093/aob/mct084)
+#'          Quercus faginea (https://doi.org/10.1093/treephys/tpaa135)
+#'          Quercus pyreneica (https://doi.org/10.1007/s00468-005-0016-4)
+add_p50_to_traits3 = function(traits, P50_file){
+  
+  # Read P50 per species
+  data_p50 = data.frame(species = as.character(unlist(read_xls(P50_file)[-1, 2])), 
+                        p50 = as.numeric(unlist(read_xls(P50_file)[-1, 3])))  %>%
+    # Add data from Sureau paper
+    rbind(data.frame(species = c("Quercus suber"), 
+                     p50 = c(-5.5))) %>%
+    # Add data from Loppez et al. 2011  (https://doi.org/10.1093/aob/mct084)
+    rbind(data.frame(species = c("Pinus canariensis"), 
+                     p50 = -4.37)) %>%
+    # Add data from Alonso-Forn et al. 2021 - Tree physiology
+    rbind(data.frame(species = c("Quercus faginea"), 
+                     p50 = -4.9)) %>%
+    # Add data from Corcuera et al. 2006 - Trees
+    rbind(data.frame(species = c("Quercus pyrenaica"), 
+                     p50 = -3.6)) %>%
+    # Add data from Delzon
+    rbind(data.frame(species = c("Castanea sativa"), 
+                     p50 = -2.5))
+  
+  # Add it to the trait dataset
+  out = traits %>%
+    left_join(data_p50, by = "species")
+    
+  
+  # Return output
+  return(out)
+}
