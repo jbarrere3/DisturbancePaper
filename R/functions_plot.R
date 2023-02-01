@@ -689,7 +689,7 @@ plot_disturbance_climate_ms <- function(sensitivity, gbif_disturbance_file, file
   # Couples disturbance - index
   disturbance.index <- data.frame(disturbance = c("snow", "storm", "fire"), 
                                   index = c("swe", "windspeed", "fwi"), 
-                                  name = c("Snow Water \n Equivalent", "Mean windspeed", "Fire Weather \n Index"), 
+                                  name = c("Snow Water \n Equivalent", "Max windspeed", "Fire Weather \n Index"), 
                                   color = c("#006D77", "#4361EE", "#F77F00"))
   
   # Loop on all couples
